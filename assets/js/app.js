@@ -61,8 +61,8 @@ var csv = URL.createObjectURL(new Blob([
   ]));
 
 //Set svg height and width
-var svgWidth = 640;
-var svgHeight = 480;
+var svgWidth = 800;
+var svgHeight = 600;
 
 //Set chart margins
 var chartMargin ={
@@ -82,9 +82,9 @@ const svg = d3.select('#scatter')
     .attr('width', svgWidth)
     .attr('height', svgHeight);
 
-// //Append chart to svg via group and shift it over
-// var chartGroup = svg.append('g')
-//     .attr('tranform', `translate(${chartMargin.left}, ${chartMargin.top})`)
+//Append chart to svg via group and shift it over
+var chartGroup = svg.append('g')
+    .attr('tranform', `translate(${chartMargin.left}, ${chartMargin.top})`)
 
 //Create lists to hold different values
 const poverty = [];
@@ -122,32 +122,43 @@ d3.csv(csv).then(function(data) {
 
     //Scale chart to fit within svg
     var yScale = d3.scaleLinear()
-        .domain(d3.extent(poverty))
-        .range(chartHeight, 0);
+        .domain(0, 100)
+        .range(0, chartHeight);
     var xScale = d3.scaleLinear()
-        .domain(d3.extent(obesity))
-        .range(chartWidth, 0);
+        .domain(0, 100)
+        .range(0, chartWidth);
 
     //Define axes
     var yAxis = d3.axisLeft(yScale);
     var xAxis = d3.axisBottom(xScale);
     
-    // //Append axes to chartgroup
-    // chartGroup.append('axis')
-    //     .call(yAxis);
-    // chartGroup.append('axis')
-    //     .attr('transform', `translate(0, ${chartHeight}`)
-    //     .call(xAxis);
+    //Append axes to chartgroup
+    chartGroup.append('g')
+        .attr('class', 'y axis')
+        .call(yAxis)
+        .append('text')
+        .attr('class', 'label')
+        .attr('transform', 'rotate(-90)')
+        .attr('y', 6)
+        .attr('dy', '.71em')
+        .style('text-anchor', 'end')
+        .text('Smoking rate')
+    chartGroup.append('axis')
+        .attr('transform', `translate(0, ${chartHeight}`)
+        .call(xAxis);
 
 
     //Loop through the data and append circles for each data point
-    for (var i = 0; i < poverty.length; i++) {
-        svg.selectAll('g')
-            .enter()
+    for (var i = 0; i < data.length; i++) {
+        chartGroup.selectAll('point')
+            .data(data)
+            .enter()   
             .append('circle')
-            .attr('cx', poverty[i])
-            .attr('cy', obesity[i])
-            .attr('r', 10)
+            .attr('cx', poverty[i] * 10)
+            .attr('cy', smokes[i] * 10)
+            .attr('r', 5)
+            
+
     }
 
 
