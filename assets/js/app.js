@@ -122,31 +122,35 @@ d3.csv(csv).then(function(data) {
 
     //Scale chart to fit within svg
     var yScale = d3.scaleLinear()
-        .domain(0, 100)
-        .range(0, chartHeight);
+        .domain([d3.extent(poverty)])
+        .range([0, chartHeight]);
     var xScale = d3.scaleLinear()
-        .domain(0, 100)
-        .range(0, chartWidth);
+        .domain([d3.extent(smokes)])
+        .range([chartWidth, 0]);
 
     //Define axes
     var yAxis = d3.axisLeft(yScale);
+   
     var xAxis = d3.axisBottom(xScale);
-    
+       
     //Append axes to chartgroup
     chartGroup.append('g')
         .attr('class', 'y axis')
         .call(yAxis)
-        .append('text')
-        .attr('class', 'label')
-        .attr('transform', 'rotate(-90)')
-        .attr('y', 6)
-        .attr('dy', '.71em')
-        .style('text-anchor', 'end')
-        .text('Smoking rate')
-    chartGroup.append('axis')
-        .attr('transform', `translate(0, ${chartHeight}`)
+    
+    chartGroup.append('g')
+        .attr('transform', `translate(0, ${chartHeight})`)
         .call(xAxis);
+    
+    // //Attempt to add ticks
+    // d3.select(chartGroup).selectAll('#y axis')
+    //     .enter().append('g')
+    //     .attr()
 
+    // //Attempt to add labels
+    //     chartGroup.append('g')
+    //     .classed('xlabel', true)
+    //     .text('In Poverty')    
 
     //Loop through the data and append circles for each data point
     for (var i = 0; i < data.length; i++) {
@@ -157,6 +161,13 @@ d3.csv(csv).then(function(data) {
             .attr('cx', poverty[i] * 10)
             .attr('cy', smokes[i] * 10)
             .attr('r', 5)
+            .style('fill', 'blue')
+            .enter().append('text')
+                .text(function(data) {
+                    return data.state[i]
+                });
+        
+
             
 
     }
