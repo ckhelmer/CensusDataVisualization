@@ -105,19 +105,19 @@ d3.csv(csv).then(function(data) {
 
     //Cast each value of dataset as number and push it to a list for easier access
     data.forEach(function(data) {
-        states.push(data.abbr)
+        // states.push(data.abbr)
         data.poverty = +data.poverty;
-        poverty.push(data.poverty);
+        // poverty.push(data.poverty);
         data.age = +data.age;
-        age.push(data.age);
+        // age.push(data.age);
         data.income = +data.income;
-        income.push(data.income);
+        // income.push(data.income);
         data.healthcare = +data.healthcare;
-        healthcare.push(data.healthcare);
+        // healthcare.push(data.healthcare);
         data.obesity = +data.obesity;
-        obesity.push(data.obesity);
+        // obesity.push(data.obesity);
         data.smokes = +data.smokes;
-        smokes.push(data.smokes);
+        // smokes.push(data.smokes);
 
         
     })
@@ -153,13 +153,18 @@ d3.csv(csv).then(function(data) {
     var yAxis = d3.axisRight(yScale);   
     
     //Append axes to chartgroup
-chartGroup.append('g')
-    .call(yAxis)
+    chartGroup.append('g')
+        .call(yAxis)
+        .append('text')
+        .attr('y', 6)
+        .attr('dy', '.71em')
+        .style('text-anchor', 'end')
+        .text('Obesity')
     
     var xGroup = chartGroup.append('g')
         .attr('transform', `translate(0, ${chartHeight})`)
         .call(xAxis)
-            // .tickValues([10]));
+  
     
    
     // //Attempt to add labels
@@ -174,28 +179,31 @@ chartGroup.append('g')
         .enter()   
         .append('circle')
         .attr('cx', data => xScale(data.poverty))
-        
         .attr('cy', data => yScale(data.smokes))
         .attr('r', 10)
         .style('fill', 'blue')
         .attr('opacity', .5)
-        .html(data => `<p style="color : black">${data.abbr}</p>`)
+        .enter().append('text')
+        .text(data => data.abbr)
+
     //Tooltips
     tip = d3.tip().attr('class', 'd3-tip').html(function(data) {
         return `${data.state}: <br> % Poverty: ${data.poverty} <br> % Smokers: ${data.smokes}` 
     })       
 
-    chartGroup.selectAll('circle')
-        .data(data)
-        .enter()
-        .append('rect')
-        .attr('width', 50)
-        .attr('height', 50)
-        // .attr('y', function(d) {return y(d) })
-        // .attr('x', function(d, i) {return x(i)})
-        .on('mouseover', tip.show)
-        .on('mouseout', tip.hide)
+    // chartGroup.selectAll('.circle')
+    //     .data(data)
+    //     .enter().append('rect')
+    //     .attr('class', 'bar')
+    //     .attr('width', 50)
+    //     .attr('height', 50)
+    //     .attr('y', function(d) {return yScale(d) })
+    //     .attr('x', function(d, i) {return xScale(i)})
+    //     .on('mouseover', tip.show)
+    //     .on('mouseout', tip.hide)
+  
+    chartGroup.call(tip)
+ 
 
-
-})
+    })
 
