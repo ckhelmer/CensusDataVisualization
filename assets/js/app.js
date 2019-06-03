@@ -66,10 +66,10 @@ var svgHeight = 600;
 
 //Set chart margins
 var chartMargin ={
-    top: 30,
-    right: 30,
-    bottom: 30,
-    left: 30
+    top: 50,
+    right: 50,
+    bottom: 50,
+    left: 50
     };
 
 //Set chart dimensions
@@ -87,6 +87,7 @@ var chartGroup = svg.append('g')
     .attr('tranform', `translate(${chartMargin.left}, ${chartMargin.top})`)
 
 //Create lists to hold different values
+const states = [];
 const poverty = [];
 const age = [];
 const income = [];
@@ -96,14 +97,15 @@ const smokes = [];
 
 //Load data
 d3.csv(csv).then(function(data) {
-    console.log(data);
-    console.log(data[1].poverty)
-    console.log(data[1].age)
-    console.log(data[1].income)
-    console.log(data[1].smokes)
+    // console.log(data);
+    // console.log(data[0].poverty)
+    // console.log(data[1].age)
+    // console.log(data[1].income)
+    // console.log(data[1].smokes)
 
     //Cast each value of dataset as number and push it to a list for easier access
     data.forEach(function(data) {
+        states.push(data.abbr)
         data.poverty = +data.poverty;
         poverty.push(data.poverty);
         data.age = +data.age;
@@ -121,56 +123,78 @@ d3.csv(csv).then(function(data) {
     })
 
     //Scale chart to fit within svg
-    var yScale = d3.scaleLinear()
-        .domain([d3.extent(poverty)])
-        .range([0, chartHeight]);
+    var xMin = d3.min(data, function(data){
+        return data.smokes;
+    })
+    var xMax = d3.max(data, function(data) {
+        return data.smokes;
+    })
+
+    var yMin = d3.min(data, function(data) {
+        return data.poverty;
+    })
+
+    var yMax = d3.max(data, function(data) {
+        return data.poverty;
+    })
+
+    console.log(xMin, xMax)
+    console.log(yMin, yMax)
+
     var xScale = d3.scaleLinear()
-        .domain([d3.extent(smokes)])
-        .range([chartWidth, 0]);
-
+        .domain([xMin-1, xMax +1])
+        .range([0, chartWidth]);
+    var yScale = d3.scaleLinear()
+        .domain([yMin-1, yMax+1])
+        .range([chartHeight, 0]);
     //Define axes
-    var yAxis = d3.axisLeft(yScale);
-   
-    var xAxis = d3.axisBottom(xScale);
        
+    var xAxis = d3.axisBottom(xScale);
+    var yAxis = d3.axisRight(yScale);   
+    
     //Append axes to chartgroup
-    chartGroup.append('g')
-        .attr('class', 'y axis')
-        .call(yAxis)
+chartGroup.append('g')
+    .call(yAxis)
     
-    chartGroup.append('g')
+    var xGroup = chartGroup.append('g')
         .attr('transform', `translate(0, ${chartHeight})`)
-        .call(xAxis);
+        .call(xAxis)
+            // .tickValues([10]));
     
-    // //Attempt to add ticks
-    // d3.select(chartGroup).selectAll('#y axis')
-    //     .enter().append('g')
-    //     .attr()
-
+   
     // //Attempt to add labels
     //     chartGroup.append('g')
     //     .classed('xlabel', true)
     //     .text('In Poverty')    
 
     //Loop through the data and append circles for each data point
-    for (var i = 0; i < data.length; i++) {
-        chartGroup.selectAll('point')
-            .data(data)
-            .enter()   
-            .append('circle')
-            .attr('cx', poverty[i] * 10)
-            .attr('cy', smokes[i] * 10)
-            .attr('r', 5)
-            .style('fill', 'blue')
-            .enter().append('text')
-                .text(function(data) {
-                    return data.state[i]
-                });
+    
+    chartGroup.selectAll('circle')
+        .data(data)
+        .enter()   
+        .append('circle')
+        .attr('cx', data => xScale(data.poverty))
         
+        .attr('cy', data => yScale(data.smokes))
+        .attr('r', 10)
+        .style('fill', 'blue')
+        .attr('opacity', .5)
+        .html(data => `<p style="color : black">${data.abbr}</p>`)
+    //Tooltips
+    tip = d3.tip().attr('class', 'd3-tip').html(function(data) {
+        return `${data.state}: <br> % Poverty: ${data.poverty} <br> % Smokers: ${data.smokes}` 
+    })       
 
-            
-
-    }
+    chartGroup.selectAll('circle')
+        .data(data)
+        .enter()
+        .append('rect')
+        .attr('width', 50)
+        .attr('height', 50)
+        // .attr('y', function(d) {return y(d) })
+        // .attr('x', function(d, i) {return x(i)})
+        .on('mouseover', tip.show)
+        .on('mouseout', tip.hide)
 
 
 })
