@@ -131,9 +131,8 @@ var chartMargin ={
 
 //Set chart dimensions
 
-var chartWidth = svgWidth - chartMargin.left - chartMargin.right;
-var chartHeight = svgHeight - chartMargin.top - chartMargin.bottom;
-
+// var chartWidth = svgWidth - chartMargin.left - chartMargin.right;
+// var chartHeight = svgHeight - chartMargin.top - chartMargin.bottom;
 
 
 //Select area of chart with scatter id and append an svg to it w/ height and width
@@ -147,8 +146,8 @@ const svg = d3.select('#scatter')
 
 //Append chart to svg via group and shift it over
 
-var chartGroup = svg.append('g')
-    .attr('tranform', `translate(${chartMargin.left}, ${chartMargin.top})`)
+//var chartGroup = svg.append('g')
+    // .attr('tranform', `translate(${chartMargin.left}, ${chartMargin.top})`)
 
 //Create lists to hold different values
 
@@ -211,17 +210,17 @@ d3.csv('assets/data/data.csv').then(function(data) {
 
     //Scale chart to fit within svg
     var xMin = d3.min(data, function(data){
-        return data.smokes;
+        return data.poverty;
     })
     var xMax = d3.max(data, function(data) {
-        return data.smokes;
+        return data.poverty;
     })
     var yMin = d3.min(data, function(data) {
-        return data.poverty;
+        return data.smokes;
     })
 
     var yMax = d3.max(data, function(data) {
-        return data.poverty;
+        return data.smokes;
     })
 
     console.log(xMin, xMax)
@@ -229,19 +228,19 @@ d3.csv('assets/data/data.csv').then(function(data) {
     
     var xScale = d3.scaleLinear()
         .domain([xMin, xMax])
-        .range([130, chartWidth-30]);
+        .range([130, svgWidth-30]);
 
     var yScale = d3.scaleLinear()
         .domain([yMin, yMax])
-        .range([chartHeight-130, 30]);
+        .range([svgHeight-130, 30]);
 
     //Define axes
     
     var xAxis = d3.axisBottom(xScale);
-    var yAxis = d3.axisRight(yScale);   
+    var yAxis = d3.axisLeft(yScale);   
 
     //Append axes to chartgroup
-    chartGroup.append('g')
+    svg.append('g')
         .call(yAxis)
         .attr('transform', 'translate(130, 0)');
         // .append('text')
@@ -250,8 +249,8 @@ d3.csv('assets/data/data.csv').then(function(data) {
         // .style('text-anchor', 'end')
         // .text('Poverty')
 
-        var xGroup = chartGroup.append('g')
-        .attr('transform', `translate(0, ${chartHeight-130})`)
+    svg.append('g')
+        .attr('transform', `translate(0, ${svgHeight-130})`)
         .call(xAxis)
 
     // // //Attempt to add labels
@@ -259,27 +258,26 @@ d3.csv('assets/data/data.csv').then(function(data) {
     //     .classed('xlabel', true)
     //     .text('In Poverty (%)')    
 
-
+    var stateNames = svg.selectAll('g stateNames')
+        .data(data)
+        .enter()
 
     //Loop through the data and append circles for each data point
  
-    chartGroup.selectAll('circle')
-        .data(data)
-        .enter()   
+    stateNames
         .append('circle')
-        .attr('cx', data => xScale(data.poverty))
-        .attr('cy', data => yScale(data.smokes))
+        .attr('cx', d => xScale(d.poverty))
+        .attr('cy', d => yScale(d.smokes))
         .attr('r', 10)
         .style('fill', 'blue')
         .attr('opacity', .5)
 
-    
-    chartGroup.selectAll('text')
-        .data(data)
-        .enter().append('text')
-        .attr('cx', data => xScale(data.poverty))
-        .attr('cy', data => yScale(data.smokes))
-        .text(data => data.abbr)
+    stateNames
+        .append('text')
+        .attr('dx', d => xScale(d.poverty))
+        .attr('dy', d => yScale(d.smokes), 5)
+        .attr('class', '.stateText')
+        .text(d => d.abbr)
     //Tooltips
 
     tip = d3.tip().attr('class', 'd3-tip').html(function(data) {
@@ -298,7 +296,7 @@ d3.csv('assets/data/data.csv').then(function(data) {
     //     .on('mouseout', tip.hide)
   
 
-    chartGroup.call(tip)
+    // chartGroup.call(tip)
 
  
 
